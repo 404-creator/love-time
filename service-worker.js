@@ -1,4 +1,4 @@
-const CACHE_NAME = "love-time-pwa-v1";
+const CACHE_NAME = "love-time-pwa-v3";
 const ASSETS = [
   "./",
   "./index.html",

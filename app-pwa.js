@@ -1,5 +1,6 @@
-const STORAGE_KEY = "love_pwa_v1";
-const BACKUP_VERSION = 1;
+const STORAGE_KEY = "love_pwa_v2";
+const OLD_STORAGE_KEY = "love_pwa_v1";
+const BACKUP_VERSION = 2;
 const DAY = 24 * 60 * 60 * 1000;
 
 const $ = (selector) => document.querySelector(selector);
@@ -20,14 +21,39 @@ const tasks = [
   "约定一个 15 分钟不看手机的小聊天。",
   "把最近没说出口的谢谢认真说一遍。",
   "一起选一首歌，当作本周的背景音乐。",
-  "给未来的你们写一句暗号。"
+  "给未来的你们写一句暗号。",
+  "今天互相发一张身边的小风景。",
+  "给对方安排一个不用花钱的小约会。"
+];
+
+const dateIdeas = [
+  "散步 20 分钟，路上每人讲一个今天的小事。",
+  "一起看一集短剧或综艺，结束后互相打分。",
+  "各自点一杯喜欢的饮料，拍照交换。",
+  "找一首歌，作为今天的专属背景音乐。",
+  "一起整理 9 张照片，拼一个小相册。",
+  "约一顿夜宵，主题是只聊开心的事。",
+  "互相推荐一个最近觉得好看的东西。",
+  "把下次见面的第一件事写进胶囊。",
+  "做一次 10 分钟语音散步，边走边聊。",
+  "各自写 3 个愿望，再选一个最想完成的。"
+];
+
+const secretCodes = [
+  "今天见面先抱 7 秒。",
+  "暗号：今天月亮偏心你。",
+  "暗号：小狗云路过。",
+  "今天的秘密奖励：多夸一句。",
+  "暗号：把烦恼放进抽屉。",
+  "今日隐藏关卡：主动说想你。"
 ];
 
 const capsuleTemplates = [
   ["一周年", "给一周年的我们", "如果这封信被打开了，说明我们又一起走过了一段很珍贵的路。谢谢你一直在。"],
   ["生日", "生日那天打开", "今天要把所有好听的话都送给你。愿你被爱包围，也一直做自己喜欢的人。"],
   ["跨年", "跨年夜的小约定", "新的一年，我们也慢慢来，好好说话，好好拥抱，好好喜欢彼此。"],
-  ["吵架后", "冷静后一起看", "如果那天我们有点别扭，也请记得：我想解决问题，不想失去你。"]
+  ["吵架后", "冷静后一起看", "如果那天我们有点别扭，也请记得：我想解决问题，不想失去你。"],
+  ["见面前", "见面前一天打开", "明天见到你的时候，我想把这段时间攒下来的开心都交给你。"]
 ];
 
 const typeText = {
@@ -41,6 +67,13 @@ let state = loadState();
 let selectedMood = state.moodToday?.mood || "sweet";
 let currentPhoto = "";
 let toastTimer = null;
+let secretTapCount = 0;
+let secretTapTimer = null;
+let manageMode = "memory";
+let manageQuery = "";
+let manageFilter = "all";
+
+const HOME_MEMORY_LIMIT = 5;
 
 function pad(value) {
   return String(value).padStart(2, "0");
@@ -69,6 +102,13 @@ function defaultState() {
     moodToday: null,
     completedTasks: [],
     currentTask: tasks[0],
+    currentDateIdea: dateIdeas[0],
+    wishes: [
+      { id: "w1", text: "一起去看一次海", done: false },
+      { id: "w2", text: "拍一组普通但很喜欢的合照", done: false }
+    ],
+    kindnessCount: 0,
+    secretCode: "轻轻点三下这里",
     memories: [
       {
         id: "m1",
@@ -114,7 +154,7 @@ function defaultState() {
 
 function loadState() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(OLD_STORAGE_KEY);
     if (raw) {
       const stored = JSON.parse(raw);
       const defaults = defaultState();
@@ -123,7 +163,8 @@ function loadState() {
         ...stored,
         couple: { ...defaults.couple, ...stored.couple },
         memories: Array.isArray(stored.memories) ? stored.memories : defaults.memories,
-        capsules: Array.isArray(stored.capsules) ? stored.capsules : defaults.capsules
+        capsules: Array.isArray(stored.capsules) ? stored.capsules : defaults.capsules,
+        wishes: Array.isArray(stored.wishes) ? stored.wishes : defaults.wishes
       };
     }
   } catch (error) {
@@ -136,6 +177,17 @@ function loadState() {
 
 function saveState(next = state) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+}
+
+function refreshAfter(message, options = {}) {
+  saveState();
+  render();
+  $(".shell").classList.remove("refresh-pop");
+  void $(".shell").offsetWidth;
+  $(".shell").classList.add("refresh-pop");
+  if (options.confetti) confetti(options.confetti === true ? 80 : options.confetti);
+  if (options.surprise) maybeRandomEasterEgg();
+  toast(message || "页面已刷新");
 }
 
 function daysBetween(start, end = todayString()) {
@@ -199,6 +251,8 @@ function render() {
   renderCapsules();
   renderMemories();
   renderTask();
+  renderWishes();
+  renderPlayful();
   fillSettings();
 }
 
@@ -235,7 +289,7 @@ function decorateCapsule(capsule) {
 function renderCapsules() {
   const capsules = state.capsules.slice().sort((a, b) => new Date(a.unlockAt) - new Date(b.unlockAt)).map(decorateCapsule);
   const next = capsules.find((item) => !item.unlocked) || capsules[0];
-  $("#nextCapsule").innerHTML = next ? capsuleHtml(next, true) : `<div class="empty">还没有胶囊，给未来写一封吧。</div>`;
+  $("#nextCapsule").innerHTML = next ? capsuleHtml(next) : `<div class="empty">还没有胶囊，给未来写一封吧。</div>`;
 }
 
 function capsuleHtml(capsule) {
@@ -253,7 +307,9 @@ function capsuleHtml(capsule) {
 
 function renderMemories() {
   const memories = state.memories.slice().sort((a, b) => new Date(b.date) - new Date(a.date));
-  $("#memoryList").innerHTML = memories.length ? memories.map((item) => `
+  const visible = memories.slice(0, HOME_MEMORY_LIMIT);
+  $("#memoryList").innerHTML = visible.length ? `
+    ${visible.map((item) => `
     <article class="memory-card">
       <div class="memory-cover">${item.photo ? `<img src="${item.photo}" alt="">` : `<span>${typeText[item.type] || "回忆"}</span>`}</div>
       <div class="memory-body">
@@ -263,12 +319,160 @@ function renderMemories() {
         <div class="ai-line">${escapeHtml(item.aiText || makeAiText(item.title, item.story))}</div>
       </div>
     </article>
-  `).join("") : `<div class="empty">第一段回忆还空着，等你来放进来。</div>`;
+  `).join("")}
+    ${memories.length > HOME_MEMORY_LIMIT ? `<div class="more-row"><button class="soft-btn" data-action="open-memory-manage">查看全部 ${memories.length} 条回忆</button></div>` : ""}
+  ` : `<div class="empty">第一段回忆还空着，等你来放进来。</div>`;
 }
 
 function renderTask() {
   $("#taskText").textContent = state.currentTask || tasks[0];
   $("#taskTag").textContent = state.completedTasks.includes(todayString()) ? "已完成" : "今日";
+}
+
+function renderWishes() {
+  const wishes = state.wishes || [];
+  $("#wishList").innerHTML = wishes.length ? wishes.map((wish) => `
+    <div class="wish-item ${wish.done ? "done" : ""}">
+      <span>${escapeHtml(wish.text)}</span>
+      <button data-wish-toggle="${wish.id}" type="button">${wish.done ? "恢复" : "完成"}</button>
+      <button data-wish-delete="${wish.id}" type="button">删</button>
+    </div>
+  `).join("") : `<div class="empty">还没有愿望，先写一个小小的。</div>`;
+}
+
+function renderPlayful() {
+  $("#dateIdea").textContent = state.currentDateIdea || dateIdeas[0];
+  $("#kindnessCount").textContent = state.kindnessCount || 0;
+  $("#secretCode").textContent = state.secretCode || "轻轻点三下这里";
+}
+
+function openManager(mode) {
+  manageMode = mode;
+  manageQuery = "";
+  manageFilter = "all";
+  $("#manageSearch").value = "";
+  renderManageFilter();
+  renderManager();
+  openDialog("#manageDialog");
+}
+
+function renderManageFilter() {
+  if (manageMode === "memory") {
+    $("#manageTitle").textContent = "全部回忆";
+    $("#manageTip").textContent = "按标题、地点、内容搜索，也可以按类型筛选。";
+    $("#manageFilter").innerHTML = `
+      <option value="all">全部类型</option>
+      <option value="photo">合照</option>
+      <option value="chat">聊天截图</option>
+      <option value="date">约会地点</option>
+      <option value="note">甜蜜瞬间</option>
+    `;
+    return;
+  }
+
+  $("#manageTitle").textContent = "全部胶囊";
+  $("#manageTip").textContent = "可以查看状态、打开到期胶囊，也可以删除不需要的胶囊。";
+  $("#manageFilter").innerHTML = `
+    <option value="all">全部状态</option>
+    <option value="locked">未解锁</option>
+    <option value="ready">可打开</option>
+    <option value="opened">已打开</option>
+  `;
+}
+
+function renderManager() {
+  if (manageMode === "memory") {
+    renderMemoryManager();
+    return;
+  }
+  renderCapsuleManager();
+}
+
+function renderMemoryManager() {
+  const query = manageQuery.trim().toLowerCase();
+  const list = state.memories
+    .slice()
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .filter((item) => manageFilter === "all" || item.type === manageFilter)
+    .filter((item) => {
+      if (!query) return true;
+      return [item.title, item.place, item.story, item.aiText]
+        .join(" ")
+        .toLowerCase()
+        .includes(query);
+    });
+
+  $("#manageList").innerHTML = list.length ? list.map((item) => `
+    <article class="manage-item">
+      <div class="manage-item-head">
+        <div>
+          <strong>${escapeHtml(item.title)}</strong>
+          <small>${item.date} · ${typeText[item.type] || "回忆"} · ${escapeHtml(item.place || "秘密地点")}</small>
+        </div>
+      </div>
+      <p>${escapeHtml(item.story)}</p>
+      ${item.aiText ? `<p class="ai-line">${escapeHtml(item.aiText)}</p>` : ""}
+      <div class="manage-actions">
+        <button class="soft-btn" data-memory-view="${item.id}" type="button">查看</button>
+        <button class="danger-btn" data-memory-delete="${item.id}" type="button">删除</button>
+      </div>
+    </article>
+  `).join("") : `<div class="empty">没有找到符合条件的回忆。</div>`;
+}
+
+function renderCapsuleManager() {
+  const query = manageQuery.trim().toLowerCase();
+  const list = state.capsules
+    .slice()
+    .sort((a, b) => new Date(a.unlockAt) - new Date(b.unlockAt))
+    .map(decorateCapsule)
+    .filter((item) => {
+      if (manageFilter === "locked") return !item.unlocked;
+      if (manageFilter === "ready") return item.unlocked && !item.opened;
+      if (manageFilter === "opened") return item.opened;
+      return true;
+    })
+    .filter((item) => {
+      if (!query) return true;
+      return [item.title, item.content, item.unlockAt].join(" ").toLowerCase().includes(query);
+    });
+
+  $("#manageList").innerHTML = list.length ? list.map((item) => `
+    <article class="manage-item">
+      <div class="manage-item-head">
+        <div>
+          <strong>${escapeHtml(item.title)}</strong>
+          <small>${item.text}</small>
+        </div>
+        <span class="stamp ${item.unlocked ? "open" : ""}">${item.unlocked ? "可开" : "封存"}</span>
+      </div>
+      <p>${item.unlocked ? escapeHtml(item.content) : "内容还在封存中，到日期后才能查看。"}</p>
+      <div class="manage-actions">
+        <button class="soft-btn" data-capsule-open="${item.id}" type="button">${item.unlocked ? "打开" : "查看"}</button>
+        <button class="danger-btn" data-capsule-delete="${item.id}" type="button">删除</button>
+      </div>
+    </article>
+  `).join("") : `<div class="empty">没有找到符合条件的胶囊。</div>`;
+}
+
+function viewMemory(id) {
+  const item = state.memories.find((memory) => memory.id === id);
+  if (!item) return;
+  alert(`${item.title}\n\n${item.date} · ${item.place || "秘密地点"}\n\n${item.story}\n\n${item.aiText || makeAiText(item.title, item.story)}`);
+}
+
+function deleteMemory(id) {
+  if (!confirm("确定删除这条回忆吗？")) return;
+  state.memories = state.memories.filter((item) => item.id !== id);
+  refreshAfter("回忆已删除，页面已刷新");
+  renderManager();
+}
+
+function deleteCapsule(id) {
+  if (!confirm("确定删除这颗胶囊吗？")) return;
+  state.capsules = state.capsules.filter((item) => item.id !== id);
+  refreshAfter("胶囊已删除，页面已刷新");
+  renderManager();
 }
 
 function fillSettings() {
@@ -359,17 +563,22 @@ function mergeImported(imported) {
   data.memories.forEach((item) => memoryMap.set(item.id || createId("m"), { ...item, id: item.id || createId("m") }));
   const capsuleMap = new Map(state.capsules.map((item) => [item.id, item]));
   data.capsules.forEach((item) => capsuleMap.set(item.id || createId("c"), { ...item, id: item.id || createId("c") }));
+  const wishMap = new Map((state.wishes || []).map((item) => [item.id, item]));
+  (data.wishes || []).forEach((item) => wishMap.set(item.id || createId("w"), { ...item, id: item.id || createId("w") }));
   state = {
     ...state,
     couple: { ...state.couple, ...data.couple },
     moodToday: data.moodToday || state.moodToday,
     currentTask: data.currentTask || state.currentTask,
+    currentDateIdea: data.currentDateIdea || state.currentDateIdea,
+    kindnessCount: Math.max(state.kindnessCount || 0, data.kindnessCount || 0),
+    secretCode: data.secretCode || state.secretCode,
     completedTasks: Array.from(new Set([...(state.completedTasks || []), ...(data.completedTasks || [])])),
+    wishes: Array.from(wishMap.values()),
     memories: Array.from(memoryMap.values()),
     capsules: Array.from(capsuleMap.values())
   };
-  saveState();
-  render();
+  refreshAfter("导入成功，页面已刷新", { confetti: 45 });
 }
 
 function makeSyncCode() {
@@ -403,7 +612,6 @@ function importFromHash() {
   try {
     mergeImported(decodePayload(code));
     history.replaceState(null, "", location.pathname + location.search);
-    toast("已从二维码导入同步数据");
   } catch (error) {
     toast("二维码同步数据不可用");
   }
@@ -429,9 +637,7 @@ function openCapsule(id) {
     return;
   }
   capsule.opened = true;
-  saveState();
-  render();
-  confetti();
+  refreshAfter("胶囊已打开，页面已刷新", { confetti: true });
   alert(`${capsule.title}\n\n${capsule.content}`);
 }
 
@@ -441,7 +647,9 @@ function dailySurprise() {
     "今天的隐藏任务：认真说一句谢谢。",
     "今日暗号：见面时先笑一下。",
     "今天适合写一个 30 天后的胶囊。",
-    "把手机递给对方，让对方选一个回忆标题。"
+    "把手机递给对方，让对方选一个回忆标题。",
+    "今天把愿望清单里最小的一件事完成掉。",
+    "今天适合存一颗糖到甜蜜存折。"
   ];
   const message = options[Math.floor(Math.random() * options.length)];
   $("#surpriseWord").textContent = "惊喜";
@@ -451,17 +659,76 @@ function dailySurprise() {
 
 function shuffleTask() {
   state.currentTask = tasks[Math.floor(Math.random() * tasks.length)];
-  saveState();
-  renderTask();
+  refreshAfter("换好啦，页面已刷新", { surprise: true });
 }
 
 function finishTask() {
   const today = todayString();
   if (!state.completedTasks.includes(today)) state.completedTasks.push(today);
-  saveState();
-  renderTask();
-  confetti();
-  toast("今日小任务完成啦");
+  state.kindnessCount = (state.kindnessCount || 0) + 1;
+  refreshAfter("今日小任务完成，顺手存了一颗糖", { confetti: true, surprise: true });
+}
+
+function addWish() {
+  const input = $("#wishInput");
+  const text = input.value.trim();
+  if (!text) {
+    toast("先写一个愿望");
+    return;
+  }
+  state.wishes.unshift({ id: createId("w"), text, done: false });
+  input.value = "";
+  refreshAfter("愿望已加入，页面已刷新", { surprise: true });
+}
+
+function toggleWish(id) {
+  const wish = state.wishes.find((item) => item.id === id);
+  if (!wish) return;
+  wish.done = !wish.done;
+  if (wish.done) state.kindnessCount = (state.kindnessCount || 0) + 1;
+  refreshAfter(wish.done ? "愿望完成啦，页面已刷新" : "愿望已恢复", { confetti: wish.done ? 70 : false });
+}
+
+function deleteWish(id) {
+  state.wishes = state.wishes.filter((item) => item.id !== id);
+  refreshAfter("愿望已删除，页面已刷新");
+}
+
+function drawDate() {
+  const next = dateIdeas[Math.floor(Math.random() * dateIdeas.length)];
+  state.currentDateIdea = next;
+  refreshAfter("抽到新的约会灵感", { surprise: true });
+}
+
+function addKindness() {
+  state.kindnessCount = (state.kindnessCount || 0) + 1;
+  refreshAfter("甜蜜存折 +1", { confetti: 35, surprise: true });
+}
+
+function revealSecretCode() {
+  secretTapCount += 1;
+  clearTimeout(secretTapTimer);
+  secretTapTimer = setTimeout(() => {
+    secretTapCount = 0;
+  }, 900);
+  if (secretTapCount < 3) {
+    toast(`再点 ${3 - secretTapCount} 下`);
+    return;
+  }
+  secretTapCount = 0;
+  state.secretCode = secretCodes[Math.floor(Math.random() * secretCodes.length)];
+  refreshAfter("今日暗号出现了", { confetti: 60 });
+}
+
+function maybeRandomEasterEgg() {
+  if (Math.random() > 0.18) return;
+  const eggs = [
+    "彩蛋：今天适合多说一句喜欢。",
+    "彩蛋：你们的甜蜜存折悄悄发光了一下。",
+    "彩蛋：把这个瞬间也存进时间轴吧。",
+    "彩蛋：未来的你们正在偷笑。"
+  ];
+  setTimeout(() => toast(eggs[Math.floor(Math.random() * eggs.length)]), 650);
 }
 
 function confetti(count = 80) {
@@ -506,9 +773,9 @@ function bindEvents() {
       $("#capsuleDate").value = addDays(30);
       openDialog("#capsuleDialog");
     }
-    if (action === "open-sync") {
-      openDialog("#syncDialog");
-    }
+    if (action === "open-memory-manage") openManager("memory");
+    if (action === "open-capsule-manage") openManager("capsule");
+    if (action === "open-sync") openDialog("#syncDialog");
     if (action === "open-settings") {
       fillSettings();
       openDialog("#settingsDialog");
@@ -516,16 +783,13 @@ function bindEvents() {
     if (action === "close-modal") closeDialogs();
     if (action === "save-mood") {
       state.moodToday = { mood: selectedMood, note: $("#moodNote").value.trim(), date: todayString() };
-      saveState();
-      render();
-      toast("今日心情已保存");
+      refreshAfter("今日心情已保存，页面已刷新", { surprise: true });
     }
     if (action === "make-sync") makeSyncCode();
     if (action === "copy-sync") navigator.clipboard.writeText($("#syncCode").value).then(() => toast("已复制"));
     if (action === "import-sync") {
       try {
         mergeImported(decodePayload($("#syncCode").value));
-        toast("导入成功");
       } catch (error) {
         toast(error.message || "导入失败");
       }
@@ -534,6 +798,10 @@ function bindEvents() {
     if (action === "daily-surprise") dailySurprise();
     if (action === "shuffle-task") shuffleTask();
     if (action === "finish-task") finishTask();
+    if (action === "add-wish") addWish();
+    if (action === "draw-date") drawDate();
+    if (action === "add-kindness") addKindness();
+    if (action === "secret-code") revealSecretCode();
 
     const mood = event.target.closest("[data-mood]")?.dataset.mood;
     if (mood) {
@@ -542,7 +810,39 @@ function bindEvents() {
     }
 
     const capsuleId = event.target.closest("[data-capsule-open]")?.dataset.capsuleOpen;
-    if (capsuleId) openCapsule(capsuleId);
+    if (capsuleId) {
+      openCapsule(capsuleId);
+      if ($("#manageDialog").open) renderManager();
+    }
+
+    const wishToggle = event.target.closest("[data-wish-toggle]")?.dataset.wishToggle;
+    if (wishToggle) toggleWish(wishToggle);
+
+    const wishDelete = event.target.closest("[data-wish-delete]")?.dataset.wishDelete;
+    if (wishDelete) deleteWish(wishDelete);
+
+    const memoryView = event.target.closest("[data-memory-view]")?.dataset.memoryView;
+    if (memoryView) viewMemory(memoryView);
+
+    const memoryDelete = event.target.closest("[data-memory-delete]")?.dataset.memoryDelete;
+    if (memoryDelete) deleteMemory(memoryDelete);
+
+    const capsuleDelete = event.target.closest("[data-capsule-delete]")?.dataset.capsuleDelete;
+    if (capsuleDelete) deleteCapsule(capsuleDelete);
+  });
+
+  $("#manageSearch").addEventListener("input", (event) => {
+    manageQuery = event.target.value;
+    renderManager();
+  });
+
+  $("#manageFilter").addEventListener("change", (event) => {
+    manageFilter = event.target.value;
+    renderManager();
+  });
+
+  $("#wishInput").addEventListener("keydown", (event) => {
+    if (event.key === "Enter") addWish();
   });
 
   $("#memoryPhoto").addEventListener("change", async (event) => {
@@ -568,10 +868,8 @@ function bindEvents() {
     currentPhoto = "";
     $("#memoryForm").reset();
     $("#photoPreview").style.display = "none";
-    saveState();
     closeDialogs();
-    render();
-    toast("已存入时间轴");
+    refreshAfter("已存入时间轴，页面已刷新", { confetti: 45, surprise: true });
   });
 
   $("#capsuleTemplates").innerHTML = capsuleTemplates.map((item, index) => `<button type="button" data-template="${index}">${item[0]}</button>`).join("");
@@ -594,10 +892,8 @@ function bindEvents() {
       opened: false
     });
     $("#capsuleForm").reset();
-    saveState();
     closeDialogs();
-    render();
-    toast("胶囊已封存");
+    refreshAfter("胶囊已封存，页面已刷新", { confetti: 35, surprise: true });
   });
 
   $("#settingsForm").addEventListener("submit", async (event) => {
@@ -606,10 +902,8 @@ function bindEvents() {
     state.couple.startDate = $("#startDate").value;
     const password = $("#lockPassword").value.trim();
     if (password) state.couple.lockHash = await hashText(password);
-    saveState();
     closeDialogs();
-    render();
-    toast("设置已保存");
+    refreshAfter("设置已保存，页面已刷新", { surprise: true });
   });
 
   $("#unlockForm").addEventListener("submit", async (event) => {
@@ -632,7 +926,6 @@ function bindEvents() {
     reader.onload = () => {
       try {
         mergeImported(JSON.parse(reader.result));
-        toast("备份导入成功");
       } catch (error) {
         toast("备份文件不对");
       }
@@ -644,9 +937,7 @@ function bindEvents() {
 function maybeLock() {
   if (!state.couple.lockHash) return;
   const last = state.couple.lastUnlockedAt ? new Date(state.couple.lastUnlockedAt).getTime() : 0;
-  if (Date.now() - last > 10 * 60 * 1000) {
-    openDialog("#lockDialog");
-  }
+  if (Date.now() - last > 10 * 60 * 1000) openDialog("#lockDialog");
 }
 
 function registerServiceWorker() {

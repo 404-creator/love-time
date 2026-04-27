@@ -86,7 +86,10 @@
           <h2>即将打开</h2>
           <p>没到时间之前，内容不会出现。</p>
         </div>
-        <button class="tiny-btn" data-action="open-capsule">新建</button>
+        <div class="section-actions">
+          <button class="tiny-btn" data-action="open-capsule-manage">管理</button>
+          <button class="tiny-btn" data-action="open-capsule">新建</button>
+        </div>
       </div>
       <div id="nextCapsule"></div>
     </section>
@@ -97,7 +100,10 @@
           <h2>我们的时间轴</h2>
           <p>照片、地点、截图和瞬间。</p>
         </div>
-        <button class="tiny-btn" data-action="open-memory">添加</button>
+        <div class="section-actions">
+          <button class="tiny-btn" data-action="open-memory-manage">全部</button>
+          <button class="tiny-btn" data-action="open-memory">添加</button>
+        </div>
       </div>
       <div id="memoryList" class="timeline"></div>
     </section>
@@ -114,6 +120,53 @@
         <span id="taskTag">今日</span>
         <strong id="taskText">给对方发一句只属于今天的夸夸。</strong>
         <button class="soft-btn" data-action="finish-task">完成</button>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h2>愿望清单</h2>
+          <p>想一起吃的、去的、完成的，都先存起来。</p>
+        </div>
+      </div>
+      <div class="wish-box panel">
+        <div class="wish-input-row">
+          <input id="wishInput" class="soft-input" maxlength="36" placeholder="比如：一起去看海">
+          <button class="tiny-btn" data-action="add-wish">加入</button>
+        </div>
+        <div id="wishList" class="wish-list"></div>
+      </div>
+    </section>
+
+    <section class="section play-grid">
+      <article class="panel date-draw">
+        <div class="section-head compact">
+          <div>
+            <h2>约会抽签</h2>
+            <p>不知道做什么时交给它。</p>
+          </div>
+        </div>
+        <strong id="dateIdea">散步 20 分钟，路上每人讲一个今天的小事。</strong>
+        <button class="soft-btn" data-action="draw-date">抽一个</button>
+      </article>
+
+      <article class="panel love-bank">
+        <div class="section-head compact">
+          <div>
+            <h2>甜蜜存折</h2>
+            <p>每做一件小事就存一颗糖。</p>
+          </div>
+        </div>
+        <div class="bank-count"><span id="kindnessCount">0</span><small>颗糖</small></div>
+        <button class="soft-btn" data-action="add-kindness">存一颗</button>
+      </article>
+    </section>
+
+    <section class="section">
+      <div class="secret-strip" data-action="secret-code">
+        <span>今日暗号</span>
+        <strong id="secretCode">轻轻点三下这里</strong>
       </div>
     </section>
 
@@ -199,6 +252,25 @@
         <button class="primary-btn" data-action="copy-sync">复制</button>
         <button class="primary-btn blue" data-action="import-sync">导入</button>
       </div>
+    </div>
+  </dialog>
+
+  <dialog id="manageDialog" class="modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <h2 id="manageTitle">内容管理</h2>
+          <p class="modal-tip" id="manageTip">搜索、筛选、查看和删除。</p>
+        </div>
+        <button class="close-btn" type="button" data-action="close-modal">关</button>
+      </div>
+      <div class="manage-tools">
+        <input id="manageSearch" class="soft-input" maxlength="36" placeholder="搜索标题、地点或内容">
+        <select id="manageFilter">
+          <option value="all">全部</option>
+        </select>
+      </div>
+      <div id="manageList" class="manage-list"></div>
     </div>
   </dialog>
 
