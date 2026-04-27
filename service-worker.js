@@ -1,10 +1,10 @@
-const CACHE_NAME = "love-time-pwa-v3";
+const CACHE_NAME = "love-time-pwa-v6";
 const ASSETS = [
   "./",
-  "./index.html",
-  "./styles.css",
-  "./app-pwa.js",
-  "./manifest.webmanifest",
+  "./index.html?v=6",
+  "./styles.css?v=6",
+  "./app-pwa.js?v=6",
+  "./manifest.webmanifest?v=6",
   "./vendor/qrcode.min.js",
   "./icons/icon-192.svg",
   "./icons/icon-512.svg"

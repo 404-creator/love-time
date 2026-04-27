@@ -1,6 +1,7 @@
 const STORAGE_KEY = "love_pwa_v2";
 const OLD_STORAGE_KEY = "love_pwa_v1";
 const BACKUP_VERSION = 2;
+const APP_VERSION = "6";
 const DAY = 24 * 60 * 60 * 1000;
 
 const $ = (selector) => document.querySelector(selector);
@@ -10,7 +11,11 @@ const moods = [
   { id: "sweet", icon: "甜", label: "很甜" },
   { id: "miss", icon: "想", label: "想你" },
   { id: "happy", icon: "晴", label: "开心" },
-  { id: "tired", icon: "困", label: "累了" }
+  { id: "tired", icon: "困", label: "累了" },
+  { id: "calm", icon: "静", label: "平静" },
+  { id: "cloudy", icon: "云", label: "低落" },
+  { id: "angry", icon: "雷", label: "别扭" },
+  { id: "surprise", icon: "星", label: "期待" }
 ];
 
 const tasks = [
@@ -23,7 +28,27 @@ const tasks = [
   "一起选一首歌，当作本周的背景音乐。",
   "给未来的你们写一句暗号。",
   "今天互相发一张身边的小风景。",
-  "给对方安排一个不用花钱的小约会。"
+  "给对方安排一个不用花钱的小约会。",
+  "互相说一个最近被对方照顾到的瞬间。",
+  "把今天最想分享的小事写成 20 个字。",
+  "约定睡前互道一句今天辛苦啦。",
+  "给对方取一个今天限定的小昵称。",
+  "一起决定一个本周的小奖励。",
+  "把一个未完成的愿望拆成第一步。",
+  "今天不讲道理，只认真抱抱或认真听。",
+  "各自写一句“我希望我们以后……”。",
+  "把一件小委屈说清楚，再给一个台阶。",
+  "互相说一个今天最需要被理解的点。",
+  "把最近一次心动写进时间轴。",
+  "给对方准备一个 5 分钟的小惊喜。",
+  "今天只用三个词描述对方。",
+  "互相分享一件小时候的小事。",
+  "把下一次约会的预算定得很小但很认真。",
+  "今天主动问一句：你现在最需要什么？",
+  "给对方写一句适合贴在备忘录里的话。",
+  "互相说一个最近想改进的小习惯。",
+  "把今天最普通的一刻拍下来发给对方。",
+  "一起决定一个只属于本周的小仪式。"
 ];
 
 const dateIdeas = [
@@ -36,7 +61,53 @@ const dateIdeas = [
   "互相推荐一个最近觉得好看的东西。",
   "把下次见面的第一件事写进胶囊。",
   "做一次 10 分钟语音散步，边走边聊。",
-  "各自写 3 个愿望，再选一个最想完成的。"
+  "各自写 3 个愿望，再选一个最想完成的。",
+  "云逛超市：各自选 3 样想一起买的东西。",
+  "一起做一份下次见面的菜单。",
+  "找一条没走过的路，走到第一个拐角再决定方向。",
+  "拍今天的天空，交换一句描述。",
+  "一起清空一个小待办，然后奖励一杯饮料。",
+  "开 20 分钟语音，各自收拾桌面。",
+  "互相给对方推荐一个表情包。",
+  "定一个小主题：今天只聊小时候。",
+  "做一次低成本电影夜：饮料、毯子、暂停讨论。",
+  "去便利店各选一样对方可能喜欢的小东西。",
+  "一起做一份“下次旅行不靠谱计划”。",
+  "找一家没吃过的小店，只点招牌菜。",
+  "一起看一段老视频，然后讲讲当时的心情。",
+  "去公园坐 15 分钟，不赶时间。",
+  "玩一次互问互答：每人 5 个问题。",
+  "一起做一个愿望清单里的低成本项目。",
+  "约一次早餐，比晚餐更像秘密行动。",
+  "各自拍一张今天最可爱的东西。",
+  "一起把一个房间角落整理好再庆祝。",
+  "选一个城市，做一份 30 分钟的云旅行攻略。"
+];
+
+const loveLines = [
+  "你出现以后，普通日子也有了收藏价值。",
+  "我喜欢你，不只在热闹的时候，也在安静的间隙。",
+  "今天也想把最软的一小块心情留给你。",
+  "和你有关的小事，总是比计划更值得记住。",
+  "如果日子有回声，我希望它喊的是你的名字。",
+  "见不到的时候，想你就是我偷偷开的窗。",
+  "你不用一直闪闪发光，我也喜欢你松弛的样子。",
+  "今天的风很普通，但想到你就变得很会说话。",
+  "我把喜欢藏得不太好，所以你应该很容易发现。",
+  "以后慢慢来吧，我想和你一起把普通过成偏爱。"
+];
+
+const memoryPrompts = [
+  "记录一次你们最近笑出来的瞬间。",
+  "写下对方最近做过的一件小小好事。",
+  "找一张旧照片，补上当时没写完的话。",
+  "记录一个只属于你们的称呼或暗号。",
+  "写下第一次觉得“就是这个人”的瞬间。",
+  "记录一次和好、一次拥抱、一次认真解释。",
+  "写一条未来看到会想笑的聊天截图说明。",
+  "记录一顿饭：吃了什么，谁夹给谁。",
+  "写下最近一次舍不得挂电话的原因。",
+  "记录一个你希望永远别忘的小细节。"
 ];
 
 const secretCodes = [
@@ -45,7 +116,10 @@ const secretCodes = [
   "暗号：小狗云路过。",
   "今天的秘密奖励：多夸一句。",
   "暗号：把烦恼放进抽屉。",
-  "今日隐藏关卡：主动说想你。"
+  "今日隐藏关卡：主动说想你。",
+  "暗号：把今天的坏心情交给我。",
+  "秘密奖励：下次见面多牵 10 分钟。",
+  "今日暗号：你一出现我就偏心。"
 ];
 
 const capsuleTemplates = [
@@ -109,6 +183,8 @@ function defaultState() {
     ],
     kindnessCount: 0,
     secretCode: "轻轻点三下这里",
+    currentLoveLine: loveLines[0],
+    currentMemoryPrompt: memoryPrompts[0],
     memories: [
       {
         id: "m1",
@@ -246,6 +322,7 @@ function render() {
   $("#capsuleCount").textContent = state.capsules.length;
   $("#moodNote").value = state.moodToday?.date === todayString() ? state.moodToday.note : "";
   selectedMood = state.moodToday?.date === todayString() ? state.moodToday.mood : selectedMood;
+  applyMoodTheme(selectedMood);
   renderMoods();
   renderAnniversaries();
   renderCapsules();
@@ -254,6 +331,12 @@ function render() {
   renderWishes();
   renderPlayful();
   fillSettings();
+}
+
+function applyMoodTheme(moodId) {
+  const classes = moods.map((mood) => `mood-${mood.id}`);
+  document.body.classList.remove(...classes);
+  document.body.classList.add(`mood-${moodId || "sweet"}`);
 }
 
 function renderMoods() {
@@ -344,6 +427,8 @@ function renderPlayful() {
   $("#dateIdea").textContent = state.currentDateIdea || dateIdeas[0];
   $("#kindnessCount").textContent = state.kindnessCount || 0;
   $("#secretCode").textContent = state.secretCode || "轻轻点三下这里";
+  $("#loveLine").textContent = state.currentLoveLine || loveLines[0];
+  $("#memoryPrompt").textContent = state.currentMemoryPrompt || memoryPrompts[0];
 }
 
 function openManager(mode) {
@@ -649,10 +734,23 @@ function dailySurprise() {
     "今天适合写一个 30 天后的胶囊。",
     "把手机递给对方，让对方选一个回忆标题。",
     "今天把愿望清单里最小的一件事完成掉。",
-    "今天适合存一颗糖到甜蜜存折。"
+    "今天适合存一颗糖到甜蜜存折。",
+    "惊喜：今天把首页换成一个最像你的心情。",
+    "惊喜：去愿望清单里挑一个最容易完成的。",
+    "惊喜：生成一句情话，发给对方不用解释。",
+    "惊喜：写一个只封存 24 小时的小胶囊。",
+    "惊喜：抽一个约会，如果太难就把它改简单。",
+    "惊喜：今天把一件小事讲具体一点。"
   ];
-  const message = options[Math.floor(Math.random() * options.length)];
+  const index = Math.floor(Math.random() * options.length);
+  const message = options[index];
   $("#surpriseWord").textContent = "惊喜";
+  if (index % 4 === 0) {
+    const randomMood = moods[Math.floor(Math.random() * moods.length)].id;
+    selectedMood = randomMood;
+    applyMoodTheme(randomMood);
+    renderMoods();
+  }
   toast(message);
   confetti(45);
 }
@@ -698,6 +796,16 @@ function drawDate() {
   const next = dateIdeas[Math.floor(Math.random() * dateIdeas.length)];
   state.currentDateIdea = next;
   refreshAfter("抽到新的约会灵感", { surprise: true });
+}
+
+function drawLoveLine() {
+  state.currentLoveLine = loveLines[Math.floor(Math.random() * loveLines.length)];
+  refreshAfter("新的情话已生成", { surprise: true });
+}
+
+function drawMemoryPrompt() {
+  state.currentMemoryPrompt = memoryPrompts[Math.floor(Math.random() * memoryPrompts.length)];
+  refreshAfter("新的回忆灵感来了", { surprise: true });
 }
 
 function addKindness() {
@@ -800,12 +908,15 @@ function bindEvents() {
     if (action === "finish-task") finishTask();
     if (action === "add-wish") addWish();
     if (action === "draw-date") drawDate();
+    if (action === "draw-love-line") drawLoveLine();
+    if (action === "draw-memory-prompt") drawMemoryPrompt();
     if (action === "add-kindness") addKindness();
     if (action === "secret-code") revealSecretCode();
 
     const mood = event.target.closest("[data-mood]")?.dataset.mood;
     if (mood) {
       selectedMood = mood;
+      applyMoodTheme(mood);
       renderMoods();
     }
 
@@ -942,7 +1053,7 @@ function maybeLock() {
 
 function registerServiceWorker() {
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./service-worker.js").catch(console.warn);
+    navigator.serviceWorker.register(`./service-worker.js?v=${APP_VERSION}`).catch(console.warn);
   }
 }
 

@@ -25,12 +25,57 @@ body {
 
 body {
   color: var(--ink);
-  background:
-    radial-gradient(circle at 12% 8%, rgba(255, 186, 144, 0.34), transparent 18rem),
-    radial-gradient(circle at 92% 10%, rgba(90, 164, 218, 0.22), transparent 18rem),
-    linear-gradient(180deg, #fff4ee 0%, #eefaf6 50%, #fff7fb 100%);
+  background: var(--app-bg, radial-gradient(circle at 12% 8%, rgba(255, 186, 144, 0.34), transparent 18rem), radial-gradient(circle at 92% 10%, rgba(90, 164, 218, 0.22), transparent 18rem), linear-gradient(180deg, #fff4ee 0%, #eefaf6 50%, #fff7fb 100%));
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+}
+
+body.mood-sweet {
+  --app-bg: radial-gradient(circle at 12% 8%, rgba(255, 186, 144, 0.38), transparent 18rem), radial-gradient(circle at 92% 10%, rgba(238, 117, 135, 0.22), transparent 18rem), linear-gradient(180deg, #fff1ee 0%, #fff8df 48%, #fff7fb 100%);
+  --hero-bg: linear-gradient(135deg, #ffe0dc 0%, #fff5c8 48%, #ffdce8 100%);
+  --accent: #ee7587;
+}
+
+body.mood-miss {
+  --app-bg: radial-gradient(circle at 12% 8%, rgba(120, 148, 218, 0.25), transparent 18rem), radial-gradient(circle at 92% 10%, rgba(201, 175, 255, 0.24), transparent 18rem), linear-gradient(180deg, #eef3ff 0%, #fff3f8 52%, #f8f1ff 100%);
+  --hero-bg: linear-gradient(135deg, #dfe9ff 0%, #fff1f8 50%, #f0e2ff 100%);
+  --accent: #6d82d8;
+}
+
+body.mood-happy {
+  --app-bg: radial-gradient(circle at 12% 8%, rgba(244, 200, 87, 0.34), transparent 18rem), radial-gradient(circle at 92% 10%, rgba(82, 185, 156, 0.24), transparent 18rem), linear-gradient(180deg, #fff8d8 0%, #eefaf6 54%, #fff7ee 100%);
+  --hero-bg: linear-gradient(135deg, #fff1b8 0%, #dff7e8 48%, #d9f0ff 100%);
+  --accent: #52b99c;
+}
+
+body.mood-tired {
+  --app-bg: radial-gradient(circle at 12% 8%, rgba(158, 168, 190, 0.24), transparent 18rem), radial-gradient(circle at 92% 10%, rgba(90, 164, 218, 0.2), transparent 18rem), linear-gradient(180deg, #f3f5f8 0%, #eef5ff 55%, #fff7ee 100%);
+  --hero-bg: linear-gradient(135deg, #e9edf4 0%, #eef6ff 48%, #fff1de 100%);
+  --accent: #7d8aa0;
+}
+
+body.mood-calm {
+  --app-bg: radial-gradient(circle at 12% 8%, rgba(82, 185, 156, 0.25), transparent 18rem), radial-gradient(circle at 92% 10%, rgba(177, 224, 206, 0.25), transparent 18rem), linear-gradient(180deg, #ecfbf5 0%, #f7fff8 52%, #fff7ee 100%);
+  --hero-bg: linear-gradient(135deg, #dff8ef 0%, #f5ffe8 48%, #eef8ff 100%);
+  --accent: #52b99c;
+}
+
+body.mood-cloudy {
+  --app-bg: radial-gradient(circle at 12% 8%, rgba(145, 155, 173, 0.28), transparent 18rem), radial-gradient(circle at 92% 10%, rgba(198, 207, 220, 0.34), transparent 18rem), linear-gradient(180deg, #eef1f5 0%, #f8fafc 55%, #fff4ee 100%);
+  --hero-bg: linear-gradient(135deg, #e7ebf0 0%, #ffffff 48%, #eaf2f8 100%);
+  --accent: #778399;
+}
+
+body.mood-angry {
+  --app-bg: radial-gradient(circle at 12% 8%, rgba(255, 157, 114, 0.36), transparent 18rem), radial-gradient(circle at 92% 10%, rgba(238, 117, 135, 0.26), transparent 18rem), linear-gradient(180deg, #fff0e8 0%, #fff8df 54%, #fff3f3 100%);
+  --hero-bg: linear-gradient(135deg, #ffd8c6 0%, #fff0bf 48%, #ffe0e5 100%);
+  --accent: #ff7d5a;
+}
+
+body.mood-surprise {
+  --app-bg: radial-gradient(circle at 12% 8%, rgba(244, 200, 87, 0.42), transparent 18rem), radial-gradient(circle at 92% 10%, rgba(90, 164, 218, 0.28), transparent 18rem), linear-gradient(180deg, #fff7d8 0%, #eff8ff 48%, #fff0fb 100%);
+  --hero-bg: linear-gradient(135deg, #fff0a8 0%, #d7f2ff 45%, #ffdff4 100%);
+  --accent: #5aa4da;
 }
 
 button,
@@ -58,7 +103,7 @@ button {
   padding: 22px;
   overflow: hidden;
   border-radius: 26px;
-  background: linear-gradient(135deg, #ffe0dc 0%, #fff5c8 48%, #d8f5ef 100%);
+  background: var(--hero-bg, linear-gradient(135deg, #ffe0dc 0%, #fff5c8 48%, #d8f5ef 100%));
   box-shadow: 0 22px 70px rgba(238, 117, 135, 0.16);
 }
 
@@ -293,14 +338,14 @@ h2 {
   width: 38px;
   height: 38px;
   border-radius: 14px;
-  background: #fff0d9;
-  color: #9c6421;
+  background: color-mix(in srgb, var(--accent, #ee7587) 18%, white);
+  color: color-mix(in srgb, var(--accent, #ee7587) 70%, #273044);
 }
 
 .mood-chip.active {
-  border-color: rgba(238, 117, 135, 0.55);
+  border-color: color-mix(in srgb, var(--accent, #ee7587) 60%, white);
   color: var(--ink);
-  box-shadow: 0 12px 28px rgba(238, 117, 135, 0.12);
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--accent, #ee7587) 18%, transparent);
 }
 
 .soft-input,
