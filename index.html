@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#fff4ee">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="恋恋时光">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>恋恋时光</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icons/icon-192.svg">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <div class="sky-art" aria-hidden="true">
+        <span class="sun"></span>
+        <span class="cloud"></span>
+        <span class="heart h1"></span>
+        <span class="heart h2"></span>
+        <span class="spark s1"></span>
+        <span class="spark s2"></span>
+      </div>
+      <div class="hero-top">
+        <div>
+          <p class="eyebrow">只在这台手机里保存</p>
+          <h1>恋恋时光</h1>
+        </div>
+        <button class="icon-btn" data-action="open-settings" aria-label="设置">设</button>
+      </div>
+      <section class="days-card">
+        <div>
+          <span id="daysTogether" class="days-num">1</span>
+          <span class="days-unit">天</span>
+        </div>
+        <p id="coupleLine">把今天和未来，都悄悄收藏起来。</p>
+      </section>
+      <div class="hero-actions">
+        <button class="primary-btn" data-action="open-memory">存回忆</button>
+        <button class="primary-btn blue" data-action="open-capsule">写胶囊</button>
+      </div>
+    </header>
+
+    <section class="quick-grid">
+      <article class="mini-stat">
+        <strong id="memoryCount">0</strong>
+        <span>回忆</span>
+      </article>
+      <article class="mini-stat">
+        <strong id="capsuleCount">0</strong>
+        <span>胶囊</span>
+      </article>
+      <article class="mini-stat surprise-card" data-action="daily-surprise">
+        <strong id="surpriseWord">今日</strong>
+        <span>小惊喜</span>
+      </article>
+    </section>
+
+    <section class="panel mood-panel">
+      <div class="section-head">
+        <div>
+          <h2>今日心情</h2>
+          <p>一句话也算认真靠近。</p>
+        </div>
+        <button class="tiny-btn" data-action="save-mood">保存</button>
+      </div>
+      <div class="mood-row" id="moodRow"></div>
+      <input id="moodNote" class="soft-input" maxlength="36" placeholder="今天想对你说...">
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h2>纪念日倒计时</h2>
+          <p>百天、周年、520 天自动算。</p>
+        </div>
+      </div>
+      <div id="anniversaryList" class="anniversary-list"></div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h2>即将打开</h2>
+          <p>没到时间之前，内容不会出现。</p>
+        </div>
+        <button class="tiny-btn" data-action="open-capsule">新建</button>
+      </div>
+      <div id="nextCapsule"></div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h2>我们的时间轴</h2>
+          <p>照片、地点、截图和瞬间。</p>
+        </div>
+        <button class="tiny-btn" data-action="open-memory">添加</button>
+      </div>
+      <div id="memoryList" class="timeline"></div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h2>恋爱小任务</h2>
+          <p>给普通日子一点点仪式感。</p>
+        </div>
+        <button class="tiny-btn" data-action="shuffle-task">换一个</button>
+      </div>
+      <div class="task-card panel">
+        <span id="taskTag">今日</span>
+        <strong id="taskText">给对方发一句只属于今天的夸夸。</strong>
+        <button class="soft-btn" data-action="finish-task">完成</button>
+      </div>
+    </section>
+
+    <nav class="bottom-nav" aria-label="快捷操作">
+      <button data-action="open-memory">回忆</button>
+      <button data-action="open-capsule">胶囊</button>
+      <button data-action="open-sync">同步</button>
+      <button data-action="open-settings">设置</button>
+    </nav>
+  </main>
+
+  <dialog id="memoryDialog" class="modal">
+    <form method="dialog" class="modal-card" id="memoryForm">
+      <div class="modal-head">
+        <h2>存一段回忆</h2>
+        <button class="close-btn" value="cancel" type="button" data-action="close-modal">关</button>
+      </div>
+      <label>类型
+        <select id="memoryType">
+          <option value="photo">合照</option>
+          <option value="chat">聊天截图</option>
+          <option value="date">约会地点</option>
+          <option value="note">甜蜜瞬间</option>
+        </select>
+      </label>
+      <label>标题
+        <input id="memoryTitle" maxlength="24" required placeholder="第一次一起看日落">
+      </label>
+      <label>日期
+        <input id="memoryDate" type="date" required>
+      </label>
+      <label>地点
+        <input id="memoryPlace" maxlength="32" placeholder="江边、电影院、学校门口">
+      </label>
+      <label>照片
+        <input id="memoryPhoto" type="file" accept="image/*">
+      </label>
+      <div id="photoPreview" class="photo-preview"></div>
+      <label>甜蜜瞬间
+        <textarea id="memoryStory" maxlength="180" required placeholder="记录一个具体的小细节。"></textarea>
+      </label>
+      <button class="primary-btn wide" type="submit">保存到时间轴</button>
+    </form>
+  </dialog>
+
+  <dialog id="capsuleDialog" class="modal">
+    <form method="dialog" class="modal-card" id="capsuleForm">
+      <div class="modal-head">
+        <h2>写给未来</h2>
+        <button class="close-btn" value="cancel" type="button" data-action="close-modal">关</button>
+      </div>
+      <div class="template-row" id="capsuleTemplates"></div>
+      <label>标题
+        <input id="capsuleTitle" maxlength="24" required placeholder="给一周年的我们">
+      </label>
+      <label>解锁日期
+        <input id="capsuleDate" type="date" required>
+      </label>
+      <label>悄悄话
+        <textarea id="capsuleContent" maxlength="800" required placeholder="现在想藏起来的话，到那天再打开。"></textarea>
+      </label>
+      <button class="primary-btn wide blue" type="submit">封存胶囊</button>
+    </form>
+  </dialog>
+
+  <dialog id="syncDialog" class="modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2>手动同步</h2>
+        <button class="close-btn" type="button" data-action="close-modal">关</button>
+      </div>
+      <p class="modal-tip">同步码会同步文字、日期、胶囊和时间轴。照片太大时不适合二维码，建议用“完整备份文件”。</p>
+      <div class="sync-actions">
+        <button class="soft-btn" data-action="make-sync">生成同步码</button>
+        <button class="soft-btn" data-action="download-backup">下载备份</button>
+        <label class="soft-btn file-btn">导入备份
+          <input id="backupFile" type="file" accept="application/json">
+        </label>
+      </div>
+      <textarea id="syncCode" class="sync-code" placeholder="这里会出现同步码，也可以粘贴对方发来的同步码。"></textarea>
+      <div id="qrBox" class="qr-box"></div>
+      <div class="sync-actions">
+        <button class="primary-btn" data-action="copy-sync">复制</button>
+        <button class="primary-btn blue" data-action="import-sync">导入</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="settingsDialog" class="modal">
+    <form method="dialog" class="modal-card" id="settingsForm">
+      <div class="modal-head">
+        <h2>我们的设置</h2>
+        <button class="close-btn" value="cancel" type="button" data-action="close-modal">关</button>
+      </div>
+      <label>你的名字
+        <input id="nameA" maxlength="10" required>
+      </label>
+      <label>对方名字
+        <input id="nameB" maxlength="10" required>
+      </label>
+      <label>在一起的日期
+        <input id="startDate" type="date" required>
+      </label>
+      <label>隐私锁密码
+        <input id="lockPassword" type="password" inputmode="numeric" maxlength="8" placeholder="留空表示不启用">
+      </label>
+      <button class="primary-btn wide" type="submit">保存设置</button>
+    </form>
+  </dialog>
+
+  <dialog id="lockDialog" class="modal lock-modal">
+    <form method="dialog" class="modal-card" id="unlockForm">
+      <h2>先打开小锁</h2>
+      <p class="modal-tip">这是本机隐私锁，用来防止别人随手打开看到。</p>
+      <input id="unlockPassword" class="soft-input lock-input" type="password" inputmode="numeric" maxlength="8" placeholder="输入密码">
+      <button class="primary-btn wide" type="submit">进入</button>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <canvas id="confetti" class="confetti" aria-hidden="true"></canvas>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script src="./vendor/qrcode.min.js"></script>
+  <script src="./app-pwa.js" type="module"></script>
+</body>
+</html>
