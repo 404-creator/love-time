@@ -8,9 +8,9 @@
   <meta name="apple-mobile-web-app-title" content="恋恋时光">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>恋恋时光</title>
-  <link rel="manifest" href="./manifest.webmanifest?v=6">
+  <link rel="manifest" href="./manifest.webmanifest?v=9">
   <link rel="apple-touch-icon" href="./icons/icon-192.svg">
-  <link rel="stylesheet" href="./styles.css?v=6">
+  <link rel="stylesheet" href="./styles.css?v=9">
 </head>
 <body>
   <main class="shell">
@@ -56,6 +56,16 @@
         <strong id="surpriseWord">今日</strong>
         <span>小惊喜</span>
       </article>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h2>本月回顾</h2>
+          <p>每个月末，看看你们攒下了多少小确幸。</p>
+        </div>
+      </div>
+      <div id="monthlyReview" class="review-card panel"></div>
     </section>
 
     <section class="panel mood-panel">
@@ -187,6 +197,49 @@
       </article>
     </section>
 
+    <section class="section play-grid">
+      <article class="panel gentle-reminder">
+        <div class="section-head compact">
+          <div>
+            <h2>温柔提醒</h2>
+            <p>不是催促，是给关系一点照看。</p>
+          </div>
+        </div>
+        <strong id="gentleReminder">今天记得好好说话，也好好听对方说话。</strong>
+        <div class="dual-actions">
+          <button class="soft-btn" data-action="draw-reminder">换一条</button>
+          <button class="soft-btn" data-action="finish-reminder">做到了</button>
+        </div>
+      </article>
+
+      <article class="panel recommendation-card">
+        <div class="section-head compact">
+          <div>
+            <h2>推荐做点</h2>
+            <p>小事更容易真的发生。</p>
+          </div>
+        </div>
+        <strong id="recommendationText">把愿望清单里最容易的一件事安排到本周。</strong>
+        <div class="dual-actions">
+          <button class="soft-btn" data-action="draw-recommendation">换一个</button>
+          <button class="soft-btn" data-action="recommendation-to-wish">加入愿望</button>
+        </div>
+      </article>
+    </section>
+
+    <section class="section">
+      <div class="question-card panel">
+        <div class="section-head compact">
+          <div>
+            <h2>今晚聊什么</h2>
+            <p>适合睡前、散步、语音时打开。</p>
+          </div>
+          <button class="tiny-btn" data-action="draw-question">换题</button>
+        </div>
+        <strong id="questionText">最近哪一刻让你觉得被我认真在乎了？</strong>
+      </div>
+    </section>
+
     <section class="section">
       <div class="secret-strip" data-action="secret-code">
         <span>今日暗号</span>
@@ -262,7 +315,7 @@
         <h2>手动同步</h2>
         <button class="close-btn" type="button" data-action="close-modal">关</button>
       </div>
-      <p class="modal-tip">同步码会同步文字、日期、胶囊和时间轴。照片太大时不适合二维码，建议用“完整备份文件”。</p>
+      <p class="modal-tip">想发给对方就点“生成同步码”；收到对方内容就粘贴后点“导入”。照片较多时，用“下载备份/导入备份”更稳。</p>
       <div class="sync-actions">
         <button class="soft-btn" data-action="make-sync">生成同步码</button>
         <button class="soft-btn" data-action="download-backup">下载备份</button>
@@ -295,6 +348,43 @@
         </select>
       </div>
       <div id="manageList" class="manage-list"></div>
+    </div>
+  </dialog>
+
+  <dialog id="detailDialog" class="modal">
+    <div class="modal-card detail-card" id="detailCard">
+      <div class="modal-head">
+        <div>
+          <h2 id="detailTitle">回忆详情</h2>
+          <p class="modal-tip" id="detailMeta"></p>
+        </div>
+        <button class="close-btn" type="button" data-action="close-modal">关</button>
+      </div>
+      <div id="detailPhoto" class="detail-photo"></div>
+      <article class="letter-paper">
+        <p id="detailStory"></p>
+        <div id="detailAi" class="ai-line"></div>
+      </article>
+    </div>
+  </dialog>
+
+  <dialog id="openCapsuleDialog" class="modal">
+    <div class="modal-card capsule-open-card">
+      <div class="modal-head">
+        <div>
+          <h2>今天终于等到啦</h2>
+          <p class="modal-tip" id="openCapsuleMeta"></p>
+        </div>
+        <button class="close-btn" type="button" data-action="close-modal">关</button>
+      </div>
+      <div class="envelope-open" aria-hidden="true">
+        <span></span>
+      </div>
+      <article class="letter-paper">
+        <h2 id="openCapsuleTitle"></h2>
+        <p id="openCapsuleContent"></p>
+      </article>
+      <button class="primary-btn wide" type="button" data-action="save-opened-capsule-memory">把开箱存成回忆</button>
     </div>
   </dialog>
 
@@ -334,6 +424,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <script src="./vendor/qrcode.min.js"></script>
-  <script src="./app-pwa.js?v=6" type="module"></script>
+  <script src="./app-pwa.js?v=9" type="module"></script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 const STORAGE_KEY = "love_pwa_v2";
 const OLD_STORAGE_KEY = "love_pwa_v1";
 const BACKUP_VERSION = 2;
-const APP_VERSION = "6";
+const APP_VERSION = "9";
 const DAY = 24 * 60 * 60 * 1000;
 
 const $ = (selector) => document.querySelector(selector);
@@ -110,6 +110,150 @@ const memoryPrompts = [
   "记录一个你希望永远别忘的小细节。"
 ];
 
+const gentleReminders = [
+  "今天记得好好说话，也好好听对方说话。",
+  "如果有点累，先说“我需要缓一下”，别直接冷掉。",
+  "今天可以主动问一句：你现在还好吗？",
+  "别把想念藏太深，简单说出来也很好。",
+  "如果对方分享小事，先接住，再评价。",
+  "今天少一点猜，多一点确认。",
+  "忙的时候也可以留一句：我晚点认真回你。",
+  "不舒服的地方，尽量说感受，不急着定罪。",
+  "今天记得夸对方一个具体细节。",
+  "别忘了照顾自己，恋爱也需要有电量。",
+  "如果吵架，先把声音放低一点。",
+  "今天可以把谢谢说完整，不只说嗯嗯。",
+  "别用沉默惩罚对方，给一个能沟通的时间。",
+  "今天适合把手机放下，认真陪 10 分钟。",
+  "如果想要抱抱，可以直接说。",
+  "今天别急着解决所有问题，先确认彼此还在同一边。",
+  "如果对方沉默，先问是不是累了，而不是马上猜坏结果。",
+  "今天适合把“你总是”换成“我刚刚感到”。",
+  "记得给对方一点自由，也给自己一点空间。",
+  "如果有误会，先复述一遍你听到的意思。",
+  "今天可以主动说一句：我愿意听你慢慢讲。",
+  "别把道歉说得太轻，也别把爱说得太少。",
+  "如果忙到没时间聊天，至少留一个确定的回应时间。",
+  "今天适合夸对方一个努力，而不是只夸结果。",
+  "别忘了问问自己：我现在是在表达爱，还是表达焦虑？",
+  "如果心里别扭，先喝水，停一分钟，再说话。",
+  "今天可以把“随便”换成一个真实的小选择。",
+  "记得把对方的分享当作靠近，不是打扰。",
+  "如果今天状态不好，也可以诚实地说：我想被温柔一点对待。",
+  "今天适合给对方一个明确的肯定。",
+  "别在气头上做决定，先给关系留一盏灯。",
+  "如果你想被陪伴，尽量说清楚要陪多久、怎么陪。",
+  "今天可以少一点比较，多一点看见。",
+  "如果对方做到了小事，记得让这份努力被看见。",
+  "今天适合说一句：和你在一起，我不是一个人。"
+];
+
+const recommendations = [
+  "把愿望清单里最容易的一件事安排到本周。",
+  "给对方发一张你现在看到的天空。",
+  "写一个 7 天后打开的小胶囊。",
+  "选一张旧照片，补一段今天的注释。",
+  "约一个不用花钱的 20 分钟散步。",
+  "互相说一个最近的压力来源。",
+  "给对方点一首歌，不解释也可以。",
+  "一起决定下次见面第一件事。",
+  "把最近想吃的一家店加入愿望清单。",
+  "做一个“下次一起买”的小清单。",
+  "今天只聊开心的事 15 分钟。",
+  "互相分享一个最近收藏的视频或文章。",
+  "把今天的心情写成天气。",
+  "给对方留一句明早醒来能看到的话。",
+  "一起清理一个小误会，不追究输赢。",
+  "约定一个本周的小奖励。",
+  "把一句没说出口的喜欢写进回忆。",
+  "问问对方最近最想被怎么陪伴。",
+  "一起挑一个头像、壁纸或表情包。",
+  "把一件小事做完，然后存一颗糖。",
+  "做一份“低成本约会清单”，至少写 5 个。",
+  "把最近想看的电影加入愿望清单。",
+  "互相发一段 30 秒语音，说今天的天气。",
+  "给对方写一个只包含三个词的夸夸。",
+  "一起决定一个本月的小目标。",
+  "把一个聊天截图存成回忆，并补上当时的心情。",
+  "今天互相推荐一道想一起吃的菜。",
+  "做一次“今晚不争辩，只倾听”的约定。",
+  "把下次见面想穿的衣服发给对方看看。",
+  "一起选一个未来胶囊的打开日期。",
+  "给对方做一张“今日使用说明”。",
+  "把最近的一句玩笑写进回忆，未来会很好笑。",
+  "互相说一个最近觉得对方变好的地方。",
+  "今天一起早睡，把晚安说得认真一点。",
+  "选一个城市，查一家以后想一起去的店。",
+  "互相分享一张今天最有生活感的照片。",
+  "给对方安排一个 5 分钟的放松任务。",
+  "把愿望清单里已完成的一项补成回忆。",
+  "一起写下“我们不想变成什么样”。",
+  "今天把一句谢谢说到具体的人和事。",
+  "给未来 30 天后的彼此写一句提醒。",
+  "互相问一个轻松问题，不聊压力。",
+  "一起决定一个小暗号，只在今天使用。",
+  "把一个小误会用一句话讲清楚。",
+  "给对方发一个此刻最像你的表情。",
+  "一起列 3 个不用花钱也能开心的事情。",
+  "把今天的推荐做点加入愿望清单。",
+  "互相说一个最近需要被鼓励的地方。",
+  "给这周的你们取一个标题。",
+  "做一次“只夸不建议”的聊天。"
+];
+
+const conversationQuestions = [
+  "最近哪一刻让你觉得被我认真在乎了？",
+  "如果我们有一个只属于两个人的节日，它应该是哪天？",
+  "你最近最希望我理解你的哪一点？",
+  "我们第一次见面时，你记得最清楚的细节是什么？",
+  "如果下次见面只能做一件事，你想做什么？",
+  "你觉得我们现在最需要增加的小习惯是什么？",
+  "最近有没有一句话，是你想听但没说出口的？",
+  "你什么时候会觉得我特别可爱？",
+  "我们以后想一起拥有一个怎样的周末？",
+  "如果给今年的我们取一个标题，会是什么？",
+  "你希望我在你低落时怎么陪你？",
+  "最近我做的哪件小事让你开心？",
+  "你觉得我们的暗号应该是什么风格？",
+  "如果写一封给三年后的信，你第一句想写什么？",
+  "你最喜欢我们相处里的哪种安静？",
+  "你有没有一个一直想和我完成的小愿望？",
+  "我们最近需要少一点什么，多一点什么？",
+  "如果把今天存进相册，标题叫什么？",
+  "你觉得“被偏爱”对你来说是什么样子？",
+  "我们下一次和好，可以试试怎么做得更温柔？",
+  "你觉得我什么时候最像在认真爱你？",
+  "我们最近有没有一个可以更轻松一点的地方？",
+  "你希望我在忙的时候怎么让你安心？",
+  "如果给我们的关系加一个小规则，你想加什么？",
+  "你最喜欢我怎样表达想你？",
+  "你有没有一个害怕说出来会被误会的需求？",
+  "我们之间最值得保留的习惯是什么？",
+  "你觉得哪一次争执其实让我们更了解彼此？",
+  "你希望我们如何庆祝普通但努力的一天？",
+  "如果下次旅行只有一天，你想怎么安排？",
+  "你最近有没有被我忽略的小情绪？",
+  "你觉得我最需要被提醒的一件事是什么？",
+  "你最喜欢我们聊天里的哪种节奏？",
+  "如果把我们写成一本书，第一章叫什么？",
+  "你觉得亲密关系里最重要的安全感来自哪里？",
+  "你希望我怎样表达道歉才会让你舒服？",
+  "我们可以怎样让见不到面的日子也有连接？",
+  "最近有什么事你想让我站在你这边？",
+  "你最想把哪一天重新过一遍？",
+  "你觉得我们的下一个小里程碑是什么？",
+  "如果今晚只能问一个问题，你最想问我什么？",
+  "你觉得我有哪些地方是你越来越喜欢的？",
+  "我们有没有一个值得建立的周末小仪式？",
+  "你希望我在你焦虑的时候说什么？",
+  "如果未来的我们看到今天，会想提醒现在什么？",
+  "你最喜欢我叫你的哪个称呼？",
+  "你觉得最近哪件小事最像爱？",
+  "你希望我们吵架后第一件事做什么？",
+  "如果把今天的心情放进胶囊，你会写什么？",
+  "我们可以一起练习哪一种更好的沟通方式？"
+];
+
 const secretCodes = [
   "今天见面先抱 7 秒。",
   "暗号：今天月亮偏心你。",
@@ -146,6 +290,7 @@ let secretTapTimer = null;
 let manageMode = "memory";
 let manageQuery = "";
 let manageFilter = "all";
+let lastOpenedCapsuleId = "";
 
 const HOME_MEMORY_LIMIT = 5;
 
@@ -185,6 +330,10 @@ function defaultState() {
     secretCode: "轻轻点三下这里",
     currentLoveLine: loveLines[0],
     currentMemoryPrompt: memoryPrompts[0],
+    currentReminder: gentleReminders[0],
+    currentRecommendation: recommendations[0],
+    currentQuestion: conversationQuestions[0],
+    completedReminders: [],
     memories: [
       {
         id: "m1",
@@ -324,6 +473,7 @@ function render() {
   selectedMood = state.moodToday?.date === todayString() ? state.moodToday.mood : selectedMood;
   applyMoodTheme(selectedMood);
   renderMoods();
+  renderMonthlyReview();
   renderAnniversaries();
   renderCapsules();
   renderMemories();
@@ -331,6 +481,36 @@ function render() {
   renderWishes();
   renderPlayful();
   fillSettings();
+}
+
+function monthKey(date = new Date()) {
+  return todayString(date).slice(0, 7);
+}
+
+function isThisMonth(dateString) {
+  return String(dateString || "").slice(0, 7) === monthKey();
+}
+
+function renderMonthlyReview() {
+  const memories = state.memories.filter((item) => isThisMonth(item.date));
+  const openedCapsules = state.capsules.filter((item) => item.opened && isThisMonth(item.openedAt || item.createdAt || item.unlockAt));
+  const completedReminders = (state.completedReminders || []).filter((date) => isThisMonth(date));
+  const mood = state.moodToday?.date && isThisMonth(state.moodToday.date)
+    ? (moods.find((item) => item.id === state.moodToday.mood)?.label || "未记录")
+    : "未记录";
+  const sweetest = memories.find((item) => item.aiText)?.aiText
+    || state.currentLoveLine
+    || "这个月还在慢慢变甜。";
+
+  $("#monthlyReview").innerHTML = `
+    <div class="review-grid">
+      <div class="review-item"><strong>${memories.length}</strong><span>本月回忆</span></div>
+      <div class="review-item"><strong>${openedCapsules.length}</strong><span>打开胶囊</span></div>
+      <div class="review-item"><strong>${escapeHtml(mood)}</strong><span>最近心情</span></div>
+      <div class="review-item"><strong>${completedReminders.length}</strong><span>做到提醒</span></div>
+    </div>
+    <p class="review-sweet">${escapeHtml(sweetest)}</p>
+  `;
 }
 
 function applyMoodTheme(moodId) {
@@ -429,6 +609,9 @@ function renderPlayful() {
   $("#secretCode").textContent = state.secretCode || "轻轻点三下这里";
   $("#loveLine").textContent = state.currentLoveLine || loveLines[0];
   $("#memoryPrompt").textContent = state.currentMemoryPrompt || memoryPrompts[0];
+  $("#gentleReminder").textContent = state.currentReminder || gentleReminders[0];
+  $("#recommendationText").textContent = state.currentRecommendation || recommendations[0];
+  $("#questionText").textContent = state.currentQuestion || conversationQuestions[0];
 }
 
 function openManager(mode) {
@@ -543,7 +726,13 @@ function renderCapsuleManager() {
 function viewMemory(id) {
   const item = state.memories.find((memory) => memory.id === id);
   if (!item) return;
-  alert(`${item.title}\n\n${item.date} · ${item.place || "秘密地点"}\n\n${item.story}\n\n${item.aiText || makeAiText(item.title, item.story)}`);
+  $("#detailTitle").textContent = item.title;
+  $("#detailMeta").textContent = `${item.date} · ${typeText[item.type] || "回忆"} · ${item.place || "秘密地点"}`;
+  $("#detailStory").textContent = item.story;
+  $("#detailAi").textContent = item.aiText || makeAiText(item.title, item.story);
+  $("#detailPhoto").classList.toggle("show", Boolean(item.photo));
+  $("#detailPhoto").innerHTML = item.photo ? `<img src="${item.photo}" alt="">` : "";
+  openDialog("#detailDialog");
 }
 
 function deleteMemory(id) {
@@ -656,9 +845,13 @@ function mergeImported(imported) {
     moodToday: data.moodToday || state.moodToday,
     currentTask: data.currentTask || state.currentTask,
     currentDateIdea: data.currentDateIdea || state.currentDateIdea,
+    currentReminder: data.currentReminder || state.currentReminder,
+    currentRecommendation: data.currentRecommendation || state.currentRecommendation,
+    currentQuestion: data.currentQuestion || state.currentQuestion,
     kindnessCount: Math.max(state.kindnessCount || 0, data.kindnessCount || 0),
     secretCode: data.secretCode || state.secretCode,
     completedTasks: Array.from(new Set([...(state.completedTasks || []), ...(data.completedTasks || [])])),
+    completedReminders: Array.from(new Set([...(state.completedReminders || []), ...(data.completedReminders || [])])),
     wishes: Array.from(wishMap.values()),
     memories: Array.from(memoryMap.values()),
     capsules: Array.from(capsuleMap.values())
@@ -670,7 +863,7 @@ function makeSyncCode() {
   const code = encodePayload(exportPayload({ includePhotos: false }));
   $("#syncCode").value = code;
   renderQr(code);
-  toast("同步码已生成");
+  toast("同步码已生成，复制发给对方即可");
 }
 
 function renderQr(code) {
@@ -722,8 +915,33 @@ function openCapsule(id) {
     return;
   }
   capsule.opened = true;
+  capsule.openedAt = todayString();
+  lastOpenedCapsuleId = capsule.id;
   refreshAfter("胶囊已打开，页面已刷新", { confetti: true });
-  alert(`${capsule.title}\n\n${capsule.content}`);
+  $("#openCapsuleTitle").textContent = capsule.title;
+  $("#openCapsuleMeta").textContent = `${capsule.unlockAt} 解锁`;
+  $("#openCapsuleContent").textContent = capsule.content;
+  openDialog("#openCapsuleDialog");
+}
+
+function saveOpenedCapsuleAsMemory() {
+  const capsule = state.capsules.find((item) => item.id === lastOpenedCapsuleId);
+  if (!capsule) {
+    toast("没有可保存的开箱内容");
+    return;
+  }
+  state.memories.unshift({
+    id: createId("m"),
+    type: "note",
+    title: `打开胶囊：${capsule.title}`,
+    date: todayString(),
+    place: "时光胶囊",
+    story: capsule.content,
+    photo: "",
+    aiText: "今天终于等到这封来自过去的信。"
+  });
+  closeDialogs();
+  refreshAfter("已把开箱存成回忆", { confetti: 60, surprise: true });
 }
 
 function dailySurprise() {
@@ -806,6 +1024,34 @@ function drawLoveLine() {
 function drawMemoryPrompt() {
   state.currentMemoryPrompt = memoryPrompts[Math.floor(Math.random() * memoryPrompts.length)];
   refreshAfter("新的回忆灵感来了", { surprise: true });
+}
+
+function drawReminder() {
+  state.currentReminder = gentleReminders[Math.floor(Math.random() * gentleReminders.length)];
+  refreshAfter("新的温柔提醒来了", { surprise: true });
+}
+
+function finishReminder() {
+  const today = todayString();
+  if (!state.completedReminders.includes(today)) state.completedReminders.push(today);
+  state.kindnessCount = (state.kindnessCount || 0) + 1;
+  refreshAfter("做到了，甜蜜存折 +1", { confetti: 45, surprise: true });
+}
+
+function drawRecommendation() {
+  state.currentRecommendation = recommendations[Math.floor(Math.random() * recommendations.length)];
+  refreshAfter("推荐已更新", { surprise: true });
+}
+
+function recommendationToWish() {
+  const text = state.currentRecommendation || recommendations[0];
+  state.wishes.unshift({ id: createId("w"), text, done: false });
+  refreshAfter("已加入愿望清单", { confetti: 35, surprise: true });
+}
+
+function drawQuestion() {
+  state.currentQuestion = conversationQuestions[Math.floor(Math.random() * conversationQuestions.length)];
+  refreshAfter("今晚的话题已更新", { surprise: true });
 }
 
 function addKindness() {
@@ -910,8 +1156,14 @@ function bindEvents() {
     if (action === "draw-date") drawDate();
     if (action === "draw-love-line") drawLoveLine();
     if (action === "draw-memory-prompt") drawMemoryPrompt();
+    if (action === "draw-reminder") drawReminder();
+    if (action === "finish-reminder") finishReminder();
+    if (action === "draw-recommendation") drawRecommendation();
+    if (action === "recommendation-to-wish") recommendationToWish();
+    if (action === "draw-question") drawQuestion();
     if (action === "add-kindness") addKindness();
     if (action === "secret-code") revealSecretCode();
+    if (action === "save-opened-capsule-memory") saveOpenedCapsuleAsMemory();
 
     const mood = event.target.closest("[data-mood]")?.dataset.mood;
     if (mood) {

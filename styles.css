@@ -300,6 +300,52 @@ h2 {
   font-weight: 800;
 }
 
+.review-card {
+  display: grid;
+  gap: 14px;
+}
+
+.review-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.review-item {
+  display: grid;
+  place-items: center;
+  min-height: 96px;
+  padding: 12px 8px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid var(--line);
+}
+
+.review-item strong {
+  color: var(--accent, var(--rose));
+  font-size: 30px;
+  line-height: 1;
+  font-weight: 950;
+}
+
+.review-item span {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+  text-align: center;
+}
+
+.review-sweet {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #fff6df;
+  color: #95681f;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
 .surprise-card {
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(255, 238, 191, 0.9));
 }
@@ -605,17 +651,29 @@ textarea {
 }
 
 .date-draw,
-.love-bank {
+.love-bank,
+.gentle-reminder,
+.recommendation-card,
+.question-card {
   display: grid;
   gap: 14px;
   align-content: start;
 }
 
-.date-draw strong {
+.date-draw strong,
+.gentle-reminder strong,
+.recommendation-card strong,
+.question-card strong {
   min-height: 76px;
   color: #33405a;
   font-size: 18px;
   line-height: 1.42;
+}
+
+.dual-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
 }
 
 .bank-count {
@@ -738,6 +796,116 @@ textarea {
   color: var(--muted);
   font-size: 13px;
   font-weight: 850;
+}
+
+.detail-card,
+.capsule-open-card {
+  background:
+    linear-gradient(#fffaf7, #fffaf7) padding-box,
+    linear-gradient(135deg, rgba(238, 117, 135, 0.34), rgba(244, 200, 87, 0.3), rgba(82, 185, 156, 0.28)) border-box;
+  border: 2px solid transparent;
+}
+
+.detail-photo {
+  display: none;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.detail-photo.show {
+  display: block;
+}
+
+.detail-photo img {
+  width: 100%;
+  max-height: 360px;
+  object-fit: cover;
+  display: block;
+}
+
+.letter-paper {
+  position: relative;
+  padding: 24px 20px;
+  border-radius: 18px;
+  background:
+    linear-gradient(90deg, rgba(238, 117, 135, 0.13) 0 2px, transparent 2px 100%) 18px 0 / 100% 100%,
+    repeating-linear-gradient(#fffdf8 0 31px, #f3eadf 32px);
+  box-shadow: inset 0 0 0 1px rgba(39, 48, 68, 0.08);
+}
+
+.letter-paper h2 {
+  margin-bottom: 14px;
+  line-height: 1.25;
+}
+
+.letter-paper p {
+  margin: 0;
+  color: #33405a;
+  font-size: 16px;
+  line-height: 1.85;
+  white-space: pre-wrap;
+}
+
+.envelope-open {
+  position: relative;
+  width: min(250px, 82%);
+  height: 150px;
+  margin: 4px auto 8px;
+  border-radius: 18px;
+  background: linear-gradient(145deg, #ffe0d8, #fff4c8);
+  box-shadow: 0 18px 38px rgba(238, 117, 135, 0.18);
+  overflow: hidden;
+  animation: envelopePop 0.75s ease both;
+}
+
+.envelope-open::before,
+.envelope-open::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.envelope-open::before {
+  clip-path: polygon(0 0, 50% 58%, 100% 0);
+  background: rgba(255, 255, 255, 0.64);
+  transform-origin: top;
+  animation: flapOpen 0.9s ease 0.18s both;
+}
+
+.envelope-open::after {
+  clip-path: polygon(0 100%, 50% 48%, 100% 100%);
+  background: rgba(238, 117, 135, 0.24);
+}
+
+.envelope-open span {
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  width: 46px;
+  height: 46px;
+  transform: translate(-50%, -50%) rotate(45deg);
+  background: var(--rose);
+  z-index: 1;
+}
+
+.envelope-open span::before,
+.envelope-open span::after {
+  content: "";
+  position: absolute;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: inherit;
+}
+
+.envelope-open span::before {
+  left: -23px;
+}
+
+.envelope-open span::after {
+  top: -23px;
 }
 
 .manage-tools {
@@ -1038,6 +1206,10 @@ textarea {
     grid-template-columns: 1fr;
   }
 
+  .review-grid {
+    grid-template-columns: 1fr;
+  }
+
   .section-actions {
     flex-direction: column;
   }
@@ -1052,5 +1224,25 @@ textarea {
   }
   100% {
     transform: scale(1);
+  }
+}
+
+@keyframes envelopePop {
+  from {
+    transform: translateY(14px) scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes flapOpen {
+  from {
+    transform: rotateX(0deg);
+  }
+  to {
+    transform: rotateX(72deg);
   }
 }
